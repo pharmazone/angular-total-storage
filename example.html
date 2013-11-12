@@ -4,38 +4,14 @@ dir="ltr" lang="en-US" class="no-js ie ie7 lte7 lte8 lte9"><![endif]--> <!--[if 
 dir="ltr" lang="en-US" class="no-js ie ie8 lte8 lte9"><![endif]--> <!--[if IE 9 ]><html
 dir="ltr" lang="en-US" class="no-js ie ie9 lte9"><![endif]--> <!--[if (gt IE 9)|!(IE)]><!--><html
 dir="ltr" lang="en-US" class="no-js"><!--<![endif]--><head> 
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	<script type="text/javascript" src="jquery.total-storage.min.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
+	<script type="text/javascript" src="ng.total-storage.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){
-			refreshKeyList();
-			$('.trigger-key-save').click(function(e){
-				e.preventDefault();
-				var key = $('#field-key').val();
-				var val = $('#field-value').val();
-				if (val){
-					$.totalStorage(key, val);
-					alert('Saved value for ' + key);
-				} else {
-					alert('You need to enter a value, fool');
-				}
-				refreshKeyList();
-			});
-			
-			$('.trigger-key-get').click(function(e){
-				e.preventDefault();
-				var key = $('#field-key-get').val();
-				trace(key);
-				var val = $.totalStorage(key);
-				trace('val = ' + val);
-				if (val){
-					$('#value-output').html(val);
-				}
-			});
-			
+		angular.module("app", ["totalStorage"])
+		.controller("appCtrl", ["$scope", "totalStorage", function($scope, totalStorage){
 			function refreshKeyList(){
-				var list = $.totalStorage.getAll();
-				var str = '';
+				var list = totalStorage.getAll(),
+					str = '';
 				for (var i = 0; i<list.length; i++){
 					if (i == list.length - 1){
 						str += 'and ' + list[i].key;
@@ -43,17 +19,41 @@ dir="ltr" lang="en-US" class="no-js"><!--<![endif]--><head>
 						str += list[i].key + ', ';
 					}
 				}
-				$('.key-list').html(str);
+				$scope.key_list = str;
+				if(!$scope.$$phase) $scope.$apply();
 			}
 			
 			function trace(m){
 				try {
 					console.log(m);
-				} catch(e){
-				
+				} catch(e){	 };
+			}
+
+			refreshKeyList()			
+
+			$scope.saveKey = function(){
+				var key = $scope.key_save,
+					val = $scope.key_value;
+
+				if (val){
+					totalStorage(key, val);
+					alert('Saved value for ' + key);
+				} else {
+					alert('You need to enter a value, fool');
+				}
+				refreshKeyList();
+			}
+			
+			$scope.getKey = function(){
+				var key = $scope.key_get;
+				trace(key);
+				var val = totalStorage(key);
+				trace('val = ' + val);
+				if (val){
+					$scope.output = val;
 				}
 			}
-		});
+		}])
 	</script>
 	<style type="text/css">
 		* {
@@ -89,36 +89,34 @@ dir="ltr" lang="en-US" class="no-js"><!--<![endif]--><head>
 		}
 	</style>
 </head>
-<body>
-<form id="input" class="io-col">
+<body ng-app="app" ng-controller="appCtrl">
+<form id="input" class="io-col" ng-submit="saveKey()">
 	<h4>To set a value:</h4>
-	<pre>$.totalStorage(key, value);</pre>
+	<pre>totalStorage(key, value);</pre>
 	<fieldset>
 		<label for="field-key">Key:</label>
-		<input type="text" id="field-key" placeholder="Enter a key to save under" class="text-input" />
+		<input type="text" id="field-key" placeholder="Enter a key to save under" class="text-input" ng-model="key_save" />
 	</fieldset>
 	<fieldset>
 		<label for="field-value">Value:</label>
-		<textarea id="field-value" placeholder="Enter the value that should be stored" class="text-input"></textarea>
+		<textarea id="field-value" placeholder="Enter the value that should be stored" class="text-input" ng-model="key_value"></textarea>
 	</fieldset>
 	<input type="submit" class="trigger-key-save big-button" value="Save!">
-	
 </form>
-<form id="output" class="io-col">
+
+<form id="output" class="io-col" ng-submit="getKey()">
 	<h4>To retrieve a value:</h4>
-	<pre>$.totalStorage(key);</pre>
+	<pre>totalStorage(key);</pre>
 	<fieldset>
 		<label for="field-key">Key:</label>
-		<input type="text" id="field-key-get" class="text-input" />
-		<p class="hint">Available values are: <span class="key-list"></span></p>
+		<input type="text" id="field-key-get" class="text-input" ng-model="key_get" />
+		<p class="hint">Available values are: <span class="key-list">{{ key_list }}</span></p>
 	</fieldset>
 	<fieldset>
 		<label for="value-output">Result:</label>
-		<div id="value-output"></div>
+		<div id="value-output">{{ output }}</div>
 	</fieldset>
 	<input type="submit" class="trigger-key-get big-button" value="Get!">
-	
-	
 </form>
 
 </body>
