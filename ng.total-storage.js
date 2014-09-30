@@ -10,6 +10,9 @@
  * and Cookie by Klaus Hartl -- though this is not connected to either project.
  *
  * Ported to AngularJS by Aditya V. Mukherjee // http://adityamukherjee.com/
+ *
+ * Updated to the lastest version of $.totalStorage(2a11d24030 * Jared Novack jarednova authored on Jan 22) 
+ * by Alexey S. Mirniy // https://github.com/pharmazone
  */
 
 /**
@@ -41,6 +44,7 @@
  * @cat Plugins/Cookie
  * @author Jared Novack/jared@upstatement.com
  * @author Aditya V. Mukherjee/aditya@adityamukherjee.com
+ * @author Alexey S. Mirniy/ github.com/pharmazone
  * @version 0.1
  */
 
@@ -49,7 +53,7 @@ angular.module("totalStorage",[])
 
 	/* Variables I'll need throghout */
 
-	var supported, ls;
+	var supported, ls, mod = 'test';
 	if ('localStorage' in window){
 		try {
 			ls = (typeof window.localStorage === 'undefined') ? undefined : window.localStorage;
@@ -58,6 +62,9 @@ angular.module("totalStorage",[])
 			} else {
 				supported = true;
 			}
+			
+			window.localStorage.setItem(mod, '1');
+			window.localStorage.removeItem(mod);
 		}
 		catch (err){
 			supported = false;
